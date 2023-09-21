@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/nguyenthenguyen/docx"
@@ -27,7 +28,16 @@ var rootCmd = &cobra.Command{
 			os.Exit(0)
 		}
 		result := r.Editable()
+
+		var evidenceInString strings.Builder
+		evidenceIndex := 1
+		for _, evidence := range evidenceList {
+			evidenceInString.WriteString(fmt.Sprintf("พยานหลักฐานลำดับที่ %d %s ยี่ห้อ xxx รุ่น xxx", evidenceIndex, evidence))
+			evidenceIndex++
+		}
+
 		result.Replace("valCaseNumber", caseNumber, -1)
+		result.Replace("valListOfEvidence", evidenceInString.String(), -1)
 
 		timestamp := time.Now().Format("2006-01-02_15-04-05")
 
