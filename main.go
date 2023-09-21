@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -47,8 +49,9 @@ var rootCmd = &cobra.Command{
 		result.Replace("valListOfIssue", issueInString.String(), -1)
 
 		timestamp := time.Now().Format("2006-01-02_15-04-05")
-
-		outputFileName := fmt.Sprintf("%s.docx", timestamp)
+		fileNameWithoutExtension := strings.TrimSuffix(template, filepath.Ext(template))
+		fileNameWithoutExtension = regexp.MustCompile(`[^a-zA-Z0-9 ]+`).ReplaceAllString(fileNameWithoutExtension, "")
+		outputFileName := fmt.Sprintf("filled_%s_%s.docx", timestamp, fileNameWithoutExtension)
 		outputFilePath := fmt.Sprintf("%s", outputFileName)
 
 		result.WriteToFile(outputFilePath)
