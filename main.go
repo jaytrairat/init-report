@@ -14,14 +14,13 @@ var (
 	template     string
 	caseNumber   string
 	evidenceList []string
+	issueList    []string
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "init-report",
 	Short: "Generate DFU Report",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(caseNumber)
-
 		r, err := docx.ReadDocxFile(template)
 		if err != nil {
 			fmt.Println("ERROR :: Cannot create report")
@@ -36,8 +35,16 @@ var rootCmd = &cobra.Command{
 			evidenceIndex++
 		}
 
+		var issueInString strings.Builder
+		issueIndex := 1
+		for _, issue := range issueList {
+			issueInString.WriteString(fmt.Sprintf("2.%d %s", issueIndex, issue))
+			issueIndex++
+		}
+
 		result.Replace("valCaseNumber", caseNumber, -1)
 		result.Replace("valListOfEvidence", evidenceInString.String(), -1)
+		result.Replace("valListOfIssue", issueInString.String(), -1)
 
 		timestamp := time.Now().Format("2006-01-02_15-04-05")
 
@@ -63,6 +70,6 @@ func main() {
 	rootCmd.Flags().StringVarP(&template, "template", "t", "ReportTemplate.docx", "Report template")
 	rootCmd.Flags().StringVarP(&caseNumber, "casenumber", "c", "01/2566", "Case number (required)")
 	rootCmd.Flags().StringSliceVarP(&evidenceList, "evidence", "e", []string{}, "Evidence")
-	rootCmd.MarkFlagRequired("casenumber")
+	rootCmd.Flags().StringSliceVarP(&issueList, "issue", "i", []string{}, "Issue")
 	Execute()
 }
