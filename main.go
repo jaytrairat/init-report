@@ -9,25 +9,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	template     string
+	caseNumber   string
+	evidenceList []string
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "init-report",
 	Short: "Generate DFU Report",
 	Run: func(cmd *cobra.Command, args []string) {
-		caseNumber, _ := cmd.Flags().GetString("casenumber")
+		fmt.Println(caseNumber)
 
-		r, err := docx.ReadDocxFile("./ReportTemplate.docx")
+		r, err := docx.ReadDocxFile(template)
 		if err != nil {
-			panic(err)
+			fmt.Println("ERROR :: Cannot create report")
+			os.Exit(0)
 		}
 		result := r.Editable()
 		result.Replace("valCaseNumber", caseNumber, -1)
 
-		// Generate a timestamp in the "YYYY-MM-DD_HH-MM-SS" format.
 		timestamp := time.Now().Format("2006-01-02_15-04-05")
 
-		outputFilePath, _ := cmd.Flags().GetString("output")
-		outputFileName := fmt.Sprintf("%s_%s.docx", caseNumber, timestamp)
-		outputFilePath = fmt.Sprintf("%s/%s", outputFilePath, outputFileName)
+		outputFileName := fmt.Sprintf("%s.docx", timestamp)
+		outputFilePath := fmt.Sprintf("%s", outputFileName)
 
 		result.WriteToFile(outputFilePath)
 
@@ -45,7 +50,9 @@ func Execute() {
 }
 
 func main() {
-	rootCmd.Flags().StringP("casenumber", "c", "", "Case number (required)")
+	rootCmd.Flags().StringVarP(&template, "template", "t", "ReportTemplate.docx", "Report template")
+	rootCmd.Flags().StringVarP(&caseNumber, "casenumber", "c", "01/2566", "Case number (required)")
+	rootCmd.Flags().StringSliceVarP(&evidenceList, "evidence", "e", []string{}, "Evidence")
 	rootCmd.MarkFlagRequired("casenumber")
 	Execute()
 }
